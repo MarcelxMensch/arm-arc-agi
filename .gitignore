@@ -1,0 +1,93 @@
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Virtual environment and caches
+.venv
+.venv/
+.cache/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Build and packaging
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg
+
+# Generated datasets and outputs — anchored to repo root so `utils/data/`
+# (ARM collator package) and `docs/presentations/data/` are not affected.
+/data/
+
+# Step checkpoints (any depth); explicit path for compatibility
+experiments/**/checkpoints/step_*/
+**/step_*
+
+# IDE and OS
+.idea/
+.vscode/
+.claude/
+.DS_Store
+*~
+
+_site/
+*.html
+
+
+wandb/
+outputs/
+
+__temp__
+
+
+# Profiling traces
+profile_trace.json
+
+# LaTeX compiled artifacts (masterarbeit)
+docs/masterarbeit/*.aux
+docs/masterarbeit/*.bbl
+docs/masterarbeit/*.bbl-SAVE-ERROR
+docs/masterarbeit/*.bcf
+docs/masterarbeit/*.blg
+docs/masterarbeit/*.fdb_latexmk
+docs/masterarbeit/*.fls
+docs/masterarbeit/*.lof
+docs/masterarbeit/*.log
+docs/masterarbeit/*.lot
+docs/masterarbeit/*.out
+docs/masterarbeit/*.run.xml
+docs/masterarbeit/*.toc
+docs/masterarbeit/thesis.pdf
+
+# MCP config (contains API keys)
+.mcp.json
+
+Masterarbeit.md
+Leitfaden.md
+third_party/TinyRecursiveModels/
+
+# LaTeX build artifacts (global)
+*.aux
+*.bcf
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.lot
+*.log
+*.nav
+*.out
+*.run.xml
+*.snm
+*.toc
+*.bcf-SAVE-ERROR
+texput.log

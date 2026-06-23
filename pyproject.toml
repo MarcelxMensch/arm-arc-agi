@@ -1,0 +1,42 @@
+[project]
+name = "arm-arc-agi"
+version = "0.1.0"
+description = "Experimenting with Hierarcical Reasoning Models on ARC-AGI"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "adam-atan2-pytorch>=0.2.4",
+    "argdantic==1.3.3",
+    "coolname==2.2.0",
+    "einops==0.8.1",
+    "huggingface-hub==0.34.4",
+    "hydra-core==1.3.2",
+    "jupyter>=1.1.1",
+    "ninja==1.13.0",
+    "numba==0.61.2",
+    "omegaconf==2.3.0",
+    "packaging==24.1",
+    "pillow>=10.0.0",
+    "pydantic==2.11.7",
+    "pydantic-core==2.33.2",
+    "safetensors>=0.4.0",
+    "setuptools==80.9.0",
+    "setuptools-scm==9.2.0",
+    "torch==2.7.0",
+    "tqdm==4.67.1",
+    "triton==3.3.0; sys_platform == 'linux'",
+    "wandb==0.26.0",
+    "wheel==0.45.1",
+    "scikit-learn>=1.5.0",
+    "matplotlib>=3.8.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "flake8",
+]
+
+[dependency-groups]
+dev = [
+    "plotly>=6.7.0",
+]

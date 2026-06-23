@@ -1,0 +1,63 @@
+name: recursive_reasoning.trm_abstraction_support_ttt@AbstractionReasoningModel_ACTV1
+loss:
+  name: losses@ACTLossHead
+  loss_type: stablemax_cross_entropy
+
+halt_exploration_prob: 0.1
+halt_max_steps: 16
+
+H_cycles: 2
+grad_cycles: 1
+L_cycles: 4
+
+L_layers: 2
+hidden_size: 512
+num_heads: 8
+expansion: 4
+
+H_layers: 3
+H_hidden_size: 256
+H_num_heads: 4
+H_expansion: 4
+num_latent_tokens: 64
+
+# No-problem-ID EMP: task signal from support + fast LoRA only.
+puzzle_emb_ndim: 0
+puzzle_emb_len: 0
+
+pos_encodings: rope
+forward_dtype: bfloat16
+
+mlp_t: False
+no_ACT_continue: True
+gate_latent_input: False
+input_injection_mode: add
+
+consistency_loss_weight: 0.0
+contrastive_aux_weight: 0.0
+use_position_gate: False
+use_spatial_bias: False
+
+max_support_examples: 8
+support_gate_bias: -2.0
+
+support_evidence_mode: emp_token
+delta_vocab_size: 13
+emp_token_id: 12
+
+# Supervised Reptile-style meta (OpenAI reference: third_party/supervised-reptile).
+meta:
+  adaptation_mode: shared_batch
+  meta_algorithm: openai_reptile
+  meta_outer_lr: 0.1
+  lora_rank: 64
+  train_backbone: true
+  inner_steps: 5
+  inner_lr: 1e-4
+  adapt_act_steps: 1
+  query_act_steps: 1
+  # Full-ACT probe: extra inner+query pass; 0 disables (saves wall time; train/full_act_* omitted).
+  full_act_probe_interval: 0
+  full_act_probe_steps: 16
+  grad_clip: 1.0
+  max_steps: 100000

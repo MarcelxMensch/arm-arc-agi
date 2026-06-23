@@ -1,0 +1,18 @@
+{
+  "_step": 575000,
+  "all/accuracy": 0.8506143689155579,
+  "all/exact_accuracy": 0.22848515212535858,
+  "all/lm_loss": 0.7990428805351257,
+  "all/q_attempted": 0.5469590425491333,
+  "all/q_attempted_correct": 0.22284255921840668,
+  "all/q_halt_accuracy": 0.6702409386634827,
+  "all/q_halt_loss": 0.8931941986083984,
+  "all/q_solvable": 0.22848515212535858,
+  "all/steps": 16.0,
+  "ARC/pass@1": 0.32375,
+  "ARC/pass@2": 0.37875,
+  "ARC/pass@5": 0.4275,
+  "ARC/pass@10": 0.45875,
+  "ARC/pass@100": 0.50625,
+  "ARC/pass@1000": 0.525
+}

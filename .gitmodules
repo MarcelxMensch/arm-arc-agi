@@ -1,0 +1,15 @@
+[submodule "utils/dataset/raw-data/ConceptARC"]
+	path = utils/dataset/raw-data/ConceptARC
+	url = https://github.com/victorvikram/ConceptARC.git
+
+[submodule "utils/dataset/raw-data/ARC-AGI"]
+	path = utils/dataset/raw-data/ARC-AGI
+	url = https://github.com/fchollet/ARC-AGI.git
+
+[submodule "utils/dataset/raw-data/ARC-AGI-2"]
+	path = utils/dataset/raw-data/ARC-AGI-2
+	url = https://github.com/arcprize/ARC-AGI-2.git
+
+[submodule "utils/dataset/raw-data/RE-ARC"]
+	path = utils/dataset/raw-data/RE-ARC
+	url = https://github.com/michaelhodel/re-arc.git

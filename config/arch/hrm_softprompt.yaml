@@ -1,0 +1,33 @@
+# HRM architecture with Grid Encoder softprompt.
+# 13-token layout: [task_1, task_2, transform, color_0, ..., color_9]
+name: recursive_reasoning.hrm_act_v1@HierarchicalReasoningModel_ACTV1
+loss:
+  name: utils.model.losses@ACTLossHead
+  loss_type: stablemax_cross_entropy
+
+halt_exploration_prob: 0.1
+halt_max_steps: 16
+
+H_cycles: 2
+L_cycles: 2
+
+H_layers: 4
+L_layers: 4
+
+hidden_size: 512
+num_heads: 8
+expansion: 4
+
+puzzle_emb_ndim: ${.hidden_size}
+
+pos_encodings: rope
+forward_dtype: bfloat16
+
+mlp_t: false
+
+debug: false
+
+# Soft prompt / grid encoder configuration
+use_soft_prompts: true
+puzzle_softprompt_len: 13
+num_transform_identifiers: 8

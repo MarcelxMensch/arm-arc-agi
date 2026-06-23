@@ -1,0 +1,13 @@
+{
+  "_step": 487698,
+  "gpu": "NVIDIA L40S",
+  "eval_batch_size": 64,
+  "eval_wall_clock_s": 16612.601171338,
+  "eval_wall_clock_h": 4.614611436482778,
+  "num_tasks": 400,
+  "pass@1": 0.18,
+  "pass@2": 0.2075,
+  "usd_per_hour": 0.86,
+  "cost_total_usd": 3.968565835375189,
+  "cost_per_task_usd": 0.009921414588437972
+}

@@ -1,0 +1,43 @@
+name: recursive_reasoning.trm_abstraction@AbstractionReasoningModel_ACTV1
+loss:
+  name: losses@ACTLossHead
+  loss_type: stablemax_cross_entropy
+
+halt_exploration_prob: 0.1
+halt_max_steps: 16
+
+H_cycles: 2
+L_cycles: 4
+
+# L-level (detailed reasoning, full resolution 30×30, D_L=512)
+L_layers: 2
+hidden_size: 512
+num_heads: 8
+expansion: 4
+
+# H-level (abstract reasoning, compressed 15×15, D_H=256)
+H_layers: 3
+H_hidden_size: 256
+H_num_heads: 4
+H_expansion: 4
+
+# Spatial compression: stride=2 → 30×30 → 15×15
+spatial_stride: 2
+
+puzzle_emb_ndim: ${.hidden_size}
+
+pos_encodings: rope
+forward_dtype: bfloat16
+
+mlp_t: False
+puzzle_emb_len: 16
+no_ACT_continue: True
+gate_latent_input: False
+input_injection_mode: add
+
+consistency_loss_weight: 0.0
+use_position_gate: False
+use_spatial_bias: False
+
+use_composite_softprompt: False
+num_transform_identifiers: 8

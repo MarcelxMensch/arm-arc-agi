@@ -1,0 +1,76 @@
+arch:
+  H_cycles: 3
+  H_layers: 0
+  L_cycles: 4
+  L_layers: 2
+  consistency_loss_weight: 0.0
+  expansion: 4
+  forward_dtype: bfloat16
+  gate_latent_input: false
+  halt_exploration_prob: 0.1
+  halt_max_steps: 16
+  hidden_size: 512
+  input_injection_mode: add
+  loss:
+    loss_type: stablemax_cross_entropy
+    name: losses@ACTLossHead
+  mlp_t: false
+  name: recursive_reasoning.trm@TinyRecursiveReasoningModel_ACTV1
+  no_ACT_continue: true
+  num_heads: 8
+  num_transform_identifiers: 8
+  pos_encodings: rope
+  puzzle_emb_len: 16
+  puzzle_emb_ndim: 512
+  use_composite_softprompt: false
+  use_position_gate: false
+  use_spatial_bias: false
+autoresearch_max_steps: null
+backbone_weight_decay: null
+beta1: 0.9
+beta2: 0.95
+checkpoint_every_eval: true
+checkpoint_interval: 25000
+checkpoint_path: experiments/abl-c3-trmopt/checkpoints
+contrastive_aux_weight: 0.0
+contrastive_temperature: 0.1
+data_paths:
+- data/arc1concept-aug-1000
+data_paths_test: []
+debug: false
+ema: true
+ema_rate: 0.999
+embedding_save_interval: 20000
+epochs: 100000
+eval_interval: 10000
+eval_save_outputs: []
+evaluators:
+- name: arc@ARC
+freeze_weights: false
+global_batch_size: 80
+gradient_accumulation_steps: 1
+load_checkpoint: null
+log_interval: 10
+lora_weight_decay: null
+lr: 0.0001
+lr_min_ratio: 1.0
+lr_warmup_steps: 2000
+meta_val_data_path: null
+meta_val_difficulty_json: null
+meta_val_episodes: 0
+meta_val_include_cost: true
+meta_val_n_shot: false
+min_eval_interval: 0
+pretrained_backbone: null
+project_name: arm-arc-agi
+puzzle_emb_lr: 0.01
+puzzle_emb_weight_decay: 0.1
+q_halt_weight: 0.0
+reset_lora_on_load: true
+run_name: abl-c3-trmopt
+seed: 0
+skip_eval: true
+support_ttt_mode: false
+val_episodes: 32
+val_interval: 0
+weight_decay: 0.1
