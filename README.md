@@ -1,6 +1,6 @@
 # ARM-ARC-AGI
 
-Research codebase for the Abstraction Reasoning Model (ARM), a hierarchical transformer architecture evaluated on ARC-AGI.
+Research codebase for the Accelerated Recursive Reasoning Model (ARM), a hierarchical transformer architecture evaluated on ARC-AGI.
 
 ## What this is
 
@@ -10,7 +10,7 @@ This repo trains and evaluates two model families:
 
 **TRM** (Tiny Recursive Reasoning Model): a two-level recurrent transformer. An L-level network processes the full 30x30 grid at original resolution. An H-level network operates on a spatially compressed (15x15) representation. The two levels alternate for several cycles before producing a prediction. Task identity is injected via a learned per-puzzle embedding.
 
-**ARM** (Abstraction Reasoning Model): extends TRM by replacing the H-level spatial tokens with a fixed set of 32 learned latent tokens. The L- and H-levels interact through bidirectional cross-attention: L-tokens attend to the latents to receive abstract guidance (broadcast), then H-latents attend back to L-tokens to extract updated information (perceive). The halting mechanism from Adaptive Computation Time (Graves, 2016) decides how many cycles to run based on the mean-pooled latent state.
+**ARM** (Accelerated Recursive Reasoning Model): extends TRM by replacing the H-level spatial tokens with a fixed set of 32 learned latent tokens. The L- and H-levels interact through bidirectional cross-attention: L-tokens attend to the latents to receive abstract guidance (broadcast), then H-latents attend back to L-tokens to extract updated information (perceive). The halting mechanism from Adaptive Computation Time (Graves, 2016) decides how many cycles to run based on the mean-pooled latent state.
 
 The key question is whether Perceiver-style latent abstraction improves generalisation over the baseline TRM at matched parameter budgets.
 

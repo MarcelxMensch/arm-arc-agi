@@ -6,7 +6,7 @@
 #SBATCH --output=logs/train/train-trm-abstraction-arc-agi-1-single-gpu-debug.out
 #SBATCH --error=logs/train/train-trm-abstraction-arc-agi-1-single-gpu-debug.err
 
-# Abstraction Reasoning Model v2: Perceiver-style cross-attention H-level.
+# Accelerated Recursive Reasoning Model v2: Perceiver-style cross-attention H-level.
 # L-level: D=512, 2 blocks, full 900-token self-attention (same cost as baseline).
 # H-level: 32 learned latent tokens, D=256, 3 self-attention blocks.
 # Cross-attention bridges: L→H (perceive) + H→L (broadcast), ~10% overhead over baseline.
@@ -16,7 +16,7 @@
 # --- Define this experiment ---
 export EXPERIMENT_NAME="train-trm-abstraction-arc-agi-1-single-gpu-debug"
 export EXPERIMENT_CATEGORY="training"
-export EXPERIMENT_DESCRIPTION="Training the Abstraction Reasoning Model on ARC-AGI-1 (1 GPU, debug logging). Spatial compression forces object-level abstraction at H-level."
+export EXPERIMENT_DESCRIPTION="Training the Accelerated Recursive Reasoning Model on ARC-AGI-1 (1 GPU, debug logging). Spatial compression forces object-level abstraction at H-level."
 
 # --- Shared scaffold ---
 if [ -n "${SLURM_JOB_ID:-}" ]; then

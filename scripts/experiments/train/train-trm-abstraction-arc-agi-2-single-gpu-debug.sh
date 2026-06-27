@@ -6,7 +6,7 @@
 #SBATCH --output=logs/train/train-trm-abstraction-arc-agi-2-single-gpu-debug.out
 #SBATCH --error=logs/train/train-trm-abstraction-arc-agi-2-single-gpu-debug.err
 
-# Abstraction Reasoning Model v2 on ARC-AGI-2.
+# Accelerated Recursive Reasoning Model v2 on ARC-AGI-2.
 # Same architecture as ARC-AGI-1 winner (pass@1=29.62% at 65k steps).
 # L-level: D=512, 2 blocks, full 900-token self-attention.
 # H-level: 32 learned latent tokens, D=256, 3 self-attention blocks.
@@ -16,7 +16,7 @@
 # --- Define this experiment ---
 export EXPERIMENT_NAME="train-trm-abstraction-arc-agi-2-single-gpu-debug"
 export EXPERIMENT_CATEGORY="training"
-export EXPERIMENT_DESCRIPTION="Abstraction Reasoning Model on ARC-AGI-2. Base config transfer from ARC-AGI-1 winner."
+export EXPERIMENT_DESCRIPTION="Accelerated Recursive Reasoning Model on ARC-AGI-2. Base config transfer from ARC-AGI-1 winner."
 
 # --- Shared scaffold ---
 if [ -n "${SLURM_JOB_ID:-}" ]; then

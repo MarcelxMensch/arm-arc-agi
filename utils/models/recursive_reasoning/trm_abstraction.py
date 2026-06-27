@@ -1,4 +1,4 @@
-"""Abstraction Reasoning Model (ARM) v2: Perceiver-style cross-attention H-level.
+"""Accelerated Recursive Reasoning Model (ARM) v2: Perceiver-style cross-attention H-level.
 
 The H-level introduces a fixed set of learned latent tokens that interact with
 the full-resolution L-level through bidirectional cross-attention. This design
@@ -67,14 +67,14 @@ IGNORE_LABEL_ID = -100
 # ---------------------------------------------------------------------------
 
 @dataclass
-class AbstractionReasoningModel_ACTV1InnerCarry:
+class AcceleratedRecursiveReasoningModel_ACTV1InnerCarry:
     z_H: torch.Tensor  # [B, num_latent_tokens, H_hidden_size]
     z_L: torch.Tensor  # [B, puzzle_emb_len + grid_len, hidden_size]
 
 
 @dataclass
-class AbstractionReasoningModel_ACTV1Carry:
-    inner_carry: AbstractionReasoningModel_ACTV1InnerCarry
+class AcceleratedRecursiveReasoningModel_ACTV1Carry:
+    inner_carry: AcceleratedRecursiveReasoningModel_ACTV1InnerCarry
     steps: torch.Tensor
     halted: torch.Tensor
     current_data: Dict[str, torch.Tensor]
@@ -84,7 +84,7 @@ class AbstractionReasoningModel_ACTV1Carry:
 # Config
 # ---------------------------------------------------------------------------
 
-class AbstractionReasoningModel_ACTV1Config(BaseModel):
+class AcceleratedRecursiveReasoningModel_ACTV1Config(BaseModel):
     batch_size: int
     seq_len: int
     puzzle_emb_ndim: int = 0
@@ -224,7 +224,7 @@ class LayerScale(nn.Module):
 class _LBlock(nn.Module):
     """L-level transformer block (full resolution, D_L)."""
 
-    def __init__(self, config: AbstractionReasoningModel_ACTV1Config) -> None:
+    def __init__(self, config: AcceleratedRecursiveReasoningModel_ACTV1Config) -> None:
         super().__init__()
         self.config = config
         if config.mlp_t:
@@ -269,7 +269,7 @@ class _LBlock(nn.Module):
 class _HBlock(nn.Module):
     """H-level self-attention block among latent tokens (D_H)."""
 
-    def __init__(self, config: AbstractionReasoningModel_ACTV1Config) -> None:
+    def __init__(self, config: AcceleratedRecursiveReasoningModel_ACTV1Config) -> None:
         super().__init__()
         D_H = config.H_hidden_size
         # No positional encoding for latent tokens (they're not spatial)
@@ -308,7 +308,7 @@ class _HBlock(nn.Module):
 class _LReasoningModule(nn.Module):
     """L-level reasoning with input injection (same as TRM)."""
 
-    def __init__(self, config: AbstractionReasoningModel_ACTV1Config, layers: List[_LBlock]):
+    def __init__(self, config: AcceleratedRecursiveReasoningModel_ACTV1Config, layers: List[_LBlock]):
         super().__init__()
         self.injection_mode = config.input_injection_mode
         self.layers = nn.ModuleList(layers)
@@ -351,7 +351,7 @@ class _LReasoningModule(nn.Module):
 class _HReasoningModule(nn.Module):
     """H-level: cross-attend to L, then self-attend among latent tokens."""
 
-    def __init__(self, config: AbstractionReasoningModel_ACTV1Config, layers: List[_HBlock]):
+    def __init__(self, config: AcceleratedRecursiveReasoningModel_ACTV1Config, layers: List[_HBlock]):
         super().__init__()
         D_H = config.H_hidden_size
         D_L = config.hidden_size
@@ -379,7 +379,7 @@ class _HReasoningModule(nn.Module):
 class _BroadcastModule(nn.Module):
     """H→L: L-level tokens cross-attend to H latent tokens for abstract guidance."""
 
-    def __init__(self, config: AbstractionReasoningModel_ACTV1Config):
+    def __init__(self, config: AcceleratedRecursiveReasoningModel_ACTV1Config):
         super().__init__()
         D_H = config.H_hidden_size
         D_L = config.hidden_size
@@ -427,8 +427,8 @@ class _DepthLoRA(nn.Module):
 # Inner model
 # ---------------------------------------------------------------------------
 
-class AbstractionReasoningModel_ACTV1_Inner(nn.Module):
-    def __init__(self, config: AbstractionReasoningModel_ACTV1Config) -> None:
+class AcceleratedRecursiveReasoningModel_ACTV1_Inner(nn.Module):
+    def __init__(self, config: AcceleratedRecursiveReasoningModel_ACTV1Config) -> None:
         super().__init__()
         self.config = config
         self.forward_dtype = getattr(torch, config.forward_dtype)
@@ -617,16 +617,16 @@ class AbstractionReasoningModel_ACTV1_Inner(nn.Module):
     # ── Carry management ─────────────────────────────────────────────────
 
     def empty_carry(self, batch_size: int):
-        return AbstractionReasoningModel_ACTV1InnerCarry(
+        return AcceleratedRecursiveReasoningModel_ACTV1InnerCarry(
             z_H=self.latent_tokens.unsqueeze(0).expand(batch_size, -1, -1).clone(),
             z_L=torch.empty(batch_size, self.config.seq_len + self.puzzle_emb_len,
                             self.config.hidden_size, dtype=self.forward_dtype),
         )
 
-    def reset_carry(self, reset_flag: torch.Tensor, carry: AbstractionReasoningModel_ACTV1InnerCarry):
+    def reset_carry(self, reset_flag: torch.Tensor, carry: AcceleratedRecursiveReasoningModel_ACTV1InnerCarry):
         # Reset z_H to learned latent tokens, z_L to L_init
         latent_init = self.latent_tokens.unsqueeze(0).expand(carry.z_H.shape[0], -1, -1)
-        return AbstractionReasoningModel_ACTV1InnerCarry(
+        return AcceleratedRecursiveReasoningModel_ACTV1InnerCarry(
             z_H=torch.where(reset_flag.view(-1, 1, 1), latent_init, carry.z_H),
             z_L=torch.where(reset_flag.view(-1, 1, 1), self.L_init, carry.z_L),
         )
@@ -635,10 +635,10 @@ class AbstractionReasoningModel_ACTV1_Inner(nn.Module):
 
     def forward(
         self,
-        carry: AbstractionReasoningModel_ACTV1InnerCarry,
+        carry: AcceleratedRecursiveReasoningModel_ACTV1InnerCarry,
         batch: Dict[str, torch.Tensor],
     ) -> Tuple[
-        AbstractionReasoningModel_ACTV1InnerCarry,
+        AcceleratedRecursiveReasoningModel_ACTV1InnerCarry,
         torch.Tensor,
         Tuple[torch.Tensor, torch.Tensor],
         Optional[torch.Tensor],
@@ -728,7 +728,7 @@ class AbstractionReasoningModel_ACTV1_Inner(nn.Module):
         output = self.lm_head(z_L[:, self.puzzle_emb_len:])
 
         # Carry (detached)
-        new_carry = AbstractionReasoningModel_ACTV1InnerCarry(
+        new_carry = AcceleratedRecursiveReasoningModel_ACTV1InnerCarry(
             z_H=z_H.detach(), z_L=z_L.detach())
 
         # Q head: mean-pool latent tokens
@@ -741,13 +741,13 @@ class AbstractionReasoningModel_ACTV1_Inner(nn.Module):
 # ACT wrapper
 # ---------------------------------------------------------------------------
 
-class AbstractionReasoningModel_ACTV1(nn.Module):
-    """ACT wrapper for Abstraction Reasoning Model."""
+class AcceleratedRecursiveReasoningModel_ACTV1(nn.Module):
+    """ACT wrapper for Accelerated Recursive Reasoning Model."""
 
     def __init__(self, config_dict: dict):
         super().__init__()
-        self.config = AbstractionReasoningModel_ACTV1Config(**config_dict)
-        self.inner = AbstractionReasoningModel_ACTV1_Inner(self.config)
+        self.config = AcceleratedRecursiveReasoningModel_ACTV1Config(**config_dict)
+        self.inner = AcceleratedRecursiveReasoningModel_ACTV1_Inner(self.config)
 
     @property
     def puzzle_emb(self):
@@ -763,7 +763,7 @@ class AbstractionReasoningModel_ACTV1(nn.Module):
 
     def initial_carry(self, batch: Dict[str, torch.Tensor]):
         batch_size = batch["inputs"].shape[0]
-        return AbstractionReasoningModel_ACTV1Carry(
+        return AcceleratedRecursiveReasoningModel_ACTV1Carry(
             inner_carry=self.inner.empty_carry(batch_size),
             steps=torch.zeros((batch_size,), dtype=torch.int32),
             halted=torch.ones((batch_size,), dtype=torch.bool),
@@ -772,9 +772,9 @@ class AbstractionReasoningModel_ACTV1(nn.Module):
 
     def forward(
         self,
-        carry: AbstractionReasoningModel_ACTV1Carry,
+        carry: AcceleratedRecursiveReasoningModel_ACTV1Carry,
         batch: Dict[str, torch.Tensor],
-    ) -> Tuple[AbstractionReasoningModel_ACTV1Carry, Dict[str, torch.Tensor]]:
+    ) -> Tuple[AcceleratedRecursiveReasoningModel_ACTV1Carry, Dict[str, torch.Tensor]]:
 
         # Reset halted sequences
         new_inner_carry = self.inner.reset_carry(carry.halted, carry.inner_carry)
@@ -823,5 +823,5 @@ class AbstractionReasoningModel_ACTV1(nn.Module):
                         torch.where(is_last_step, next_q_halt_logits,
                                     torch.maximum(next_q_halt_logits, next_q_continue_logits)))
 
-        return AbstractionReasoningModel_ACTV1Carry(
+        return AcceleratedRecursiveReasoningModel_ACTV1Carry(
             new_inner_carry, new_steps, halted, new_current_data), outputs

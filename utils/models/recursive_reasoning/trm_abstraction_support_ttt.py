@@ -46,20 +46,20 @@ from utils.models.recursive_reasoning.trm_abstraction import (
 
 
 @dataclass
-class AbstractionReasoningModel_ACTV1InnerCarry:
+class AcceleratedRecursiveReasoningModel_ACTV1InnerCarry:
     z_H: torch.Tensor
     z_L: torch.Tensor
 
 
 @dataclass
-class AbstractionReasoningModel_ACTV1Carry:
-    inner_carry: AbstractionReasoningModel_ACTV1InnerCarry
+class AcceleratedRecursiveReasoningModel_ACTV1Carry:
+    inner_carry: AcceleratedRecursiveReasoningModel_ACTV1InnerCarry
     steps: torch.Tensor
     halted: torch.Tensor
     current_data: Dict[str, torch.Tensor]
 
 
-class AbstractionReasoningModel_ACTV1Config(BaseModel):
+class AcceleratedRecursiveReasoningModel_ACTV1Config(BaseModel):
     batch_size: int
     seq_len: int
     puzzle_emb_ndim: int = 0
@@ -130,7 +130,7 @@ class DeltaTokenEmbedder(nn.Module):
     embedding is needed.
     """
 
-    def __init__(self, config: AbstractionReasoningModel_ACTV1Config) -> None:
+    def __init__(self, config: AcceleratedRecursiveReasoningModel_ACTV1Config) -> None:
         super().__init__()
         self.config = config
         self.forward_dtype = getattr(torch, config.forward_dtype)
@@ -168,7 +168,7 @@ class SupportTokenEmbedder(nn.Module):
 
     def __init__(
         self,
-        config: AbstractionReasoningModel_ACTV1Config,
+        config: AcceleratedRecursiveReasoningModel_ACTV1Config,
         use_role_emb: bool = True,
     ) -> None:
         super().__init__()
@@ -215,7 +215,7 @@ class DeltaReadBlock(nn.Module):
     work with a difference signal.
     """
 
-    def __init__(self, config: AbstractionReasoningModel_ACTV1Config) -> None:
+    def __init__(self, config: AcceleratedRecursiveReasoningModel_ACTV1Config) -> None:
         super().__init__()
         D_H = config.H_hidden_size
         self.delta_read = CrossAttention(D_H, D_H, config.H_num_heads, config.rms_norm_eps)
@@ -236,8 +236,8 @@ class DeltaReadBlock(nn.Module):
         return rms_norm(z_H + gate * candidate, variance_epsilon=self.norm_eps)
 
 
-class AbstractionReasoningModel_ACTV1_Inner(nn.Module):
-    def __init__(self, config: AbstractionReasoningModel_ACTV1Config) -> None:
+class AcceleratedRecursiveReasoningModel_ACTV1_Inner(nn.Module):
+    def __init__(self, config: AcceleratedRecursiveReasoningModel_ACTV1Config) -> None:
         super().__init__()
         self.config = config
         self.forward_dtype = getattr(torch, config.forward_dtype)
@@ -344,8 +344,8 @@ class AbstractionReasoningModel_ACTV1_Inner(nn.Module):
         # TTT alone provides the task conditioning at inference time.
         return None
 
-    def empty_carry(self, batch_size: int) -> AbstractionReasoningModel_ACTV1InnerCarry:
-        return AbstractionReasoningModel_ACTV1InnerCarry(
+    def empty_carry(self, batch_size: int) -> AcceleratedRecursiveReasoningModel_ACTV1InnerCarry:
+        return AcceleratedRecursiveReasoningModel_ACTV1InnerCarry(
             z_H=self.latent_tokens.unsqueeze(0).expand(batch_size, -1, -1).clone(),
             z_L=torch.empty(batch_size, self.config.seq_len, self.config.hidden_size, dtype=self.forward_dtype),
         )
@@ -353,10 +353,10 @@ class AbstractionReasoningModel_ACTV1_Inner(nn.Module):
     def reset_carry(
         self,
         reset_flag: torch.Tensor,
-        carry: AbstractionReasoningModel_ACTV1InnerCarry,
-    ) -> AbstractionReasoningModel_ACTV1InnerCarry:
+        carry: AcceleratedRecursiveReasoningModel_ACTV1InnerCarry,
+    ) -> AcceleratedRecursiveReasoningModel_ACTV1InnerCarry:
         latent_init = self.latent_tokens.unsqueeze(0).expand(carry.z_H.shape[0], -1, -1)
-        return AbstractionReasoningModel_ACTV1InnerCarry(
+        return AcceleratedRecursiveReasoningModel_ACTV1InnerCarry(
             z_H=torch.where(reset_flag.view(-1, 1, 1), latent_init, carry.z_H),
             z_L=torch.where(reset_flag.view(-1, 1, 1), self.L_init, carry.z_L),
         )
@@ -385,10 +385,10 @@ class AbstractionReasoningModel_ACTV1_Inner(nn.Module):
 
     def forward(
         self,
-        carry: AbstractionReasoningModel_ACTV1InnerCarry,
+        carry: AcceleratedRecursiveReasoningModel_ACTV1InnerCarry,
         batch: Dict[str, torch.Tensor],
     ) -> Tuple[
-        AbstractionReasoningModel_ACTV1InnerCarry,
+        AcceleratedRecursiveReasoningModel_ACTV1InnerCarry,
         torch.Tensor,
         Tuple[torch.Tensor, torch.Tensor],
         Optional[torch.Tensor],
@@ -430,17 +430,17 @@ class AbstractionReasoningModel_ACTV1_Inner(nn.Module):
             )
 
         output = self.lm_head(z_L)
-        new_carry = AbstractionReasoningModel_ACTV1InnerCarry(z_H=z_H.detach(), z_L=z_L.detach())
+        new_carry = AcceleratedRecursiveReasoningModel_ACTV1InnerCarry(z_H=z_H.detach(), z_L=z_L.detach())
         q_logits = self.q_head(z_H.mean(dim=1)).to(torch.float32)
         z_H_with_grad: Optional[torch.Tensor] = z_H if self.config.contrastive_aux_weight > 0.0 else None
         return new_carry, output, (q_logits[..., 0], q_logits[..., 1]), z_H_penultimate, z_H_with_grad
 
 
-class AbstractionReasoningModel_ACTV1(nn.Module):
+class AcceleratedRecursiveReasoningModel_ACTV1(nn.Module):
     def __init__(self, config_dict: dict):
         super().__init__()
-        self.config = AbstractionReasoningModel_ACTV1Config(**config_dict)
-        self.inner = AbstractionReasoningModel_ACTV1_Inner(self.config)
+        self.config = AcceleratedRecursiveReasoningModel_ACTV1Config(**config_dict)
+        self.inner = AcceleratedRecursiveReasoningModel_ACTV1_Inner(self.config)
 
     @property
     def puzzle_emb(self):
@@ -450,9 +450,9 @@ class AbstractionReasoningModel_ACTV1(nn.Module):
     def sparse_embeddings(self):
         return []
 
-    def initial_carry(self, batch: Dict[str, torch.Tensor]) -> AbstractionReasoningModel_ACTV1Carry:
+    def initial_carry(self, batch: Dict[str, torch.Tensor]) -> AcceleratedRecursiveReasoningModel_ACTV1Carry:
         batch_size = batch["inputs"].shape[0]
-        return AbstractionReasoningModel_ACTV1Carry(
+        return AcceleratedRecursiveReasoningModel_ACTV1Carry(
             inner_carry=self.inner.empty_carry(batch_size),
             steps=torch.zeros((batch_size,), dtype=torch.int32),
             halted=torch.ones((batch_size,), dtype=torch.bool),
@@ -475,9 +475,9 @@ class AbstractionReasoningModel_ACTV1(nn.Module):
 
     def forward(
         self,
-        carry: AbstractionReasoningModel_ACTV1Carry,
+        carry: AcceleratedRecursiveReasoningModel_ACTV1Carry,
         batch: Dict[str, torch.Tensor],
-    ) -> Tuple[AbstractionReasoningModel_ACTV1Carry, Dict[str, torch.Tensor]]:
+    ) -> Tuple[AcceleratedRecursiveReasoningModel_ACTV1Carry, Dict[str, torch.Tensor]]:
         if "support_inputs" not in batch or "support_outputs" not in batch or "support_mask" not in batch:
             raise KeyError(
                 "trm_abstraction_support_ttt requires support_inputs, support_outputs, and support_mask. "
@@ -552,7 +552,7 @@ class AbstractionReasoningModel_ACTV1(nn.Module):
                         )
                     )
 
-        return AbstractionReasoningModel_ACTV1Carry(
+        return AcceleratedRecursiveReasoningModel_ACTV1Carry(
             new_inner_carry,
             new_steps,
             halted,

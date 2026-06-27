@@ -1,4 +1,4 @@
-name: recursive_reasoning.trm_abstraction_support_ttt@AbstractionReasoningModel_ACTV1
+name: recursive_reasoning.trm_abstraction_support_ttt@AcceleratedRecursiveReasoningModel_ACTV1
 loss:
   name: losses@ACTLossHead
   loss_type: stablemax_cross_entropy
