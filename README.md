@@ -10,9 +10,9 @@ This repo trains and evaluates two model families:
 
 **TRM** (Tiny Recursive Reasoning Model): a two-level recurrent transformer. An L-level network processes the full 30x30 grid at original resolution. An H-level network operates on a spatially compressed (15x15) representation. The two levels alternate for several cycles before producing a prediction. Task identity is injected via a learned per-puzzle embedding.
 
-**ARM** (Accelerated Recursive Reasoning Model): extends TRM by replacing the H-level spatial tokens with a fixed set of 32 learned latent tokens. The L- and H-levels interact through bidirectional cross-attention: L-tokens attend to the latents to receive abstract guidance (broadcast), then H-latents attend back to L-tokens to extract updated information (perceive). The halting mechanism from Adaptive Computation Time (Graves, 2016) decides how many cycles to run based on the mean-pooled latent state.
+**ARM** (Accelerated Recursive Reasoning Model): extends TRM by replacing the H-level spatial tokens with a fixed set of 32 learned latent tokens. The L- and H-levels interact through bidirectional cross-attention: L-tokens attend to the latents to receive high-level guidance (broadcast), then H-latents attend back to L-tokens to extract updated information (perceive). The halting mechanism from Adaptive Computation Time (Graves, 2016) decides how many cycles to run based on the mean-pooled latent state.
 
-The key question is whether Perceiver-style latent abstraction improves generalisation over the baseline TRM at matched parameter budgets.
+The key question is whether the Perceiver-style latent-token mechanism accelerates convergence over the baseline TRM at matched parameter budgets.
 
 ## Repository layout
 
@@ -176,7 +176,7 @@ The H-level replaces spatial tokens with 32 learned latent tokens (hidden size 2
 
 ## Key results
 
-At 32M training samples, ARM reaches approximately 4.5 percentage points above the TRM baseline on `ARC/pass@1`. Extended runs to 58M samples show all three variants (TRM-Opt, broadcast-only, gated) converging to ARM's 25.0% ceiling, confirming that the broadcast and gate mechanisms are gradient-equivalent at scale and that the gain comes from the latent abstraction structure rather than the conditioning mechanism.
+At 32M training samples, ARM reaches approximately 4.5 percentage points above the TRM baseline on `ARC/pass@1`. Extended runs to 58M samples show all three variants (TRM-Opt, broadcast-only, gated) converging to the same ~25.0% ceiling, confirming that the broadcast and gate mechanisms are gradient-equivalent at scale and that ARM's advantage is accelerated convergence (sample efficiency) rather than a higher final ceiling.
 
 ## Dependencies
 
